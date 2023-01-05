@@ -10,13 +10,17 @@ export default function Home() {
   // console.log(products);
 
   const [idEdit, setIdEdit] = useState();
+  const [product, setProduct] = useState([]);
+  let { products } = product;
+  const [pending, setPending] = useState(true);
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    reset,
-  } = useForm();
+  useEffect(() => {
+    fetch("https://dummyjson.com/products").then((res) =>
+      res.json().then((result) => {
+        setProduct(result);
+      })
+    );
+  }, []);
 
   useEffect(() => {
     let modal = document.getElementById("Modal");
@@ -26,6 +30,20 @@ export default function Home() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPending(false);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    reset,
+  } = useForm();
 
   const openModal = () => {
     clearFrom();
@@ -108,19 +126,6 @@ export default function Home() {
     });
   };
 
-  const [product, setProduct] = useState([]);
-  let { products } = product;
-
-  useEffect(() => {
-    fetch("https://dummyjson.com/products").then((res) =>
-      res.json().then((result) => {
-        setProduct(result);
-      })
-    );
-  }, []);
-
-  // console.log(products);
-  // return <></>;
   const column = [
     {
       name: "Title",
@@ -161,20 +166,11 @@ export default function Home() {
     <pre>{JSON.stringify(data, null, 2)}</pre>
   );
 
-  const [pending, setPending] = useState(true);
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setPending(false);
-    }, 2000);
-    return () => clearTimeout(timeout);
-  }, []);
-
   const data = products;
 
   return (
     <div className="flex flex-col w-full h-full">
       <Toaster position="top-right" reverseOrder={false}></Toaster>
-      <div id="idEdit"></div>
       <p className="text-3xl">Requisition</p>
       <br></br>
       <hr></hr>
