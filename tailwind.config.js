@@ -18,6 +18,9 @@ module.exports = {
       },
       borderWidth: {
         "1": "1px",
+      },
+      colors: {
+        "main": "#61c0bf"
       }
     },
   },

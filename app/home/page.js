@@ -71,6 +71,7 @@ export default function Home() {
   const closeModal = () => {
     let modal = document.getElementById("Modal");
     modal.style.display = "none";
+    setIdEdit();
   };
 
   const clearFrom = () => {
@@ -126,6 +127,10 @@ export default function Home() {
     });
   };
 
+  const search = () => {
+    document.getElementById("table").style.display = "block";
+  };
+
   const column = [
     {
       name: "Title",
@@ -171,7 +176,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full h-full">
       <Toaster position="top-right" reverseOrder={false}></Toaster>
-      <p className="text-3xl">Requisition</p>
+      <p className="text-3xl">Menu 1</p>
       <br></br>
       <hr></hr>
       <div className="justify-end items-end w-full flex my-2">
@@ -182,30 +187,23 @@ export default function Home() {
           New Requisition
         </button>
       </div>
-      <div className="w-full h-full flex flex-col">
+      <div className="w-full h-full flex flex-col overflow-auto">
         <form className="w-full">
-          <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
+          <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
             <label>Input Date</label>
             <input
               type="text"
               className="focus:outline-none focus:border-main"
             ></input>
           </div>
-          <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
+          <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
             <label>Input Date</label>
             <input
               type="text"
               className="focus:outline-none focus:border-main"
             ></input>
           </div>
-          <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
-            <label>Input Text</label>
-            <input
-              type="text"
-              className="focus:outline-none focus:border-main"
-            ></input>
-          </div>
-          <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
+          <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
             <label>Input Text</label>
             <input
               type="text"
@@ -213,13 +211,17 @@ export default function Home() {
             ></input>
           </div>
           <div className="flex flex-row p-2">
-            <button className="bg-main p-1 text-white rounded-lg" type="button">
+            <button
+              className="bg-main p-1 text-white rounded-lg"
+              type="button"
+              onClick={search}
+            >
               Search
             </button>
           </div>
         </form>
       </div>
-      <div className="w-full h-auto p-6">
+      <div className="w-full h-auto p-6 hidden" id="table">
         <DataTable
           data={data}
           columns={column}
@@ -257,7 +259,7 @@ export default function Home() {
                 className="w-full"
                 onSubmit={handleSubmit(() => onsubmit())}
               >
-                <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
+                <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
                   <label>Title</label>
                   <input
                     type="text"
@@ -269,7 +271,7 @@ export default function Home() {
                     {errors.title?.type === "required" && "Title is required"}
                   </div>
                 </div>
-                <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
+                <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
                   <label>Brand</label>
                   <input
                     type="text"
@@ -281,7 +283,7 @@ export default function Home() {
                     {errors.brand?.type === "required" && "Brand is required"}
                   </div>
                 </div>
-                <div className="flex w-full [&>label]:w-1/5 flex-row p-3 [&>input]:w-1/4 [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
+                <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
                   <label>Description</label>
                   <input
                     type="text"
