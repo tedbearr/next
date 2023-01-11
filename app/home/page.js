@@ -13,6 +13,7 @@ export default function Home() {
   const [product, setProduct] = useState([]);
   let { products } = product;
   const [pending, setPending] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("https://dummyjson.com/products").then((res) =>
@@ -43,6 +44,7 @@ export default function Home() {
     formState: { errors },
     handleSubmit,
     reset,
+    getFieldState,
   } = useForm();
 
   const openModal = () => {
@@ -55,6 +57,8 @@ export default function Home() {
 
   const openModalEdit = async (id) => {
     reset();
+    document.getElementById("Modal").style.display = "block";
+    setLoading(true);
     await fetch(`https://dummyjson.com/products/${id}`).then((res) =>
       res.json().then((resp) => {
         setIdEdit(resp.id);
@@ -63,27 +67,49 @@ export default function Home() {
         document.getElementById("data3").value = resp.description;
       })
     );
+    setLoading(false);
+    // console.log(getFieldState("brand"));
+  };
 
-    let modal = document.getElementById("Modal");
-    modal.style.display = "block";
+  const openModalView = async (id) => {
+    reset();
+    document.getElementById("Modal").style.display = "block";
+    setLoading(true);
+    await fetch(`https://dummyjson.com/products/${id}`).then((res) =>
+      res.json().then((resp) => {
+        setIdEdit(resp.id);
+        document.getElementById("data1").value = resp.title;
+        document.getElementById("data2").value = resp.brand;
+        document.getElementById("data3").value = resp.description;
+        document.getElementById("data1").readOnly = true;
+        document.getElementById("data2").readOnly = true;
+        document.getElementById("data3").readOnly = true;
+      })
+    );
+    setLoading(false);
+    // console.log(getFieldState("brand"));
   };
 
   const closeModal = () => {
     let modal = document.getElementById("Modal");
     modal.style.display = "none";
-    setIdEdit();
+    clearFrom();
   };
 
   const clearFrom = () => {
     document.getElementById("data1").value = "";
     document.getElementById("data2").value = "";
     document.getElementById("data3").value = "";
+    document.getElementById("data1").readOnly = false;
+    document.getElementById("data2").readOnly = false;
+    document.getElementById("data3").readOnly = false;
   };
 
   const onsubmit = async (data) => {
     console.log(idEdit);
     if (idEdit) {
-      fetch(`https://dummyjson.com/products/${idEdit}`, {
+      setLoading(true);
+      await fetch(`https://dummyjson.com/products/${idEdit}`, {
         method: "PUT" /* or PATCH */,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -94,10 +120,12 @@ export default function Home() {
           toast.error("Error");
         }
       });
+      setLoading(false);
       clearFrom();
       reset();
       closeModal();
     } else {
+      setLoading(true);
       await fetch("https://dummyjson.com/products/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,14 +137,16 @@ export default function Home() {
           toast.error("Error");
         }
       });
+      setLoading(false);
       clearFrom();
       reset();
       closeModal();
     }
   };
 
-  const deleteData = (id) => {
-    fetch(`https://dummyjson.com/products/${id}`, {
+  const deleteData = async (id) => {
+    setLoading(true);
+    await fetch(`https://dummyjson.com/products/${id}`, {
       method: "DELETE",
     }).then((res) => {
       if (res.status == 200) {
@@ -125,6 +155,7 @@ export default function Home() {
         toast.error("Error");
       }
     });
+    setLoading(false);
   };
 
   const search = () => {
@@ -148,19 +179,27 @@ export default function Home() {
     {
       name: "Action",
       button: true,
+      width: "200px",
       cell: (row) => (
         <>
           <button
-            onClick={() => openModalEdit(row.id)}
-            className="w-full bg-slate-300 p-1 mr-2 rounded-sm"
+            onClick={() => openModalView(row.id)}
+            className="w-full bg-slate-400 py-1 mr-2 rounded-sm"
+            title="View"
           >
-            edit
+            <i className="fa fa-eye text-white"></i>
+          </button>
+          <button
+            onClick={() => openModalEdit(row.id)}
+            className="w-full bg-green-500 p-1 mr-2 rounded-sm"
+          >
+            <i className="fa fa-pencil text-white"></i>
           </button>
           <button
             onClick={() => deleteData(row.id)}
-            className="w-full bg-slate-200 p-1 rounded-sm"
+            className="w-full bg-red-500 p-1 rounded-sm"
           >
-            delete
+            <i className="fa fa-trash text-white"></i>
           </button>
         </>
       ),
@@ -181,12 +220,13 @@ export default function Home() {
       <hr></hr>
       <div className="justify-end items-end w-full flex my-2">
         <button
-          className="bg-main p-2 text-white rounded-lg"
+          className="bg-main p-2 text-white rounded-lg hover:bg-slate-400"
           onClick={openModal}
         >
-          New Requisition
+          New Data
         </button>
       </div>
+      {/* Filter form  */}
       <div className="w-full h-full flex flex-col overflow-auto">
         <form className="w-full">
           <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
@@ -212,7 +252,7 @@ export default function Home() {
           </div>
           <div className="flex flex-row p-2">
             <button
-              className="bg-main p-1 text-white rounded-lg"
+              className="bg-main p-1 text-white rounded-lg hover:bg-slate-400"
               type="button"
               onClick={search}
             >
@@ -221,12 +261,13 @@ export default function Home() {
           </div>
         </form>
       </div>
+      {/* DataTable */}
       <div className="w-full h-auto p-6 hidden" id="table">
         <DataTable
           data={data}
           columns={column}
           pagination
-          title="Requisition Data"
+          title="Data"
           progressPending={pending}
           responsive
           subHeaderAlign="right"
@@ -234,9 +275,12 @@ export default function Home() {
           striped
           direction="auto"
           dense
+          expandableRows
+          expandableRowsComponent={ExpandedComponent}
           // defaultSortFieldId={1}
         ></DataTable>
       </div>
+      {/* Modal Form  */}
       <div
         className=" hidden fixed pt-24 pb-24 left-0 top-0 w-full h-full overflow-auto bg-gray-500 bg-opacity-40"
         id="Modal"
@@ -255,10 +299,7 @@ export default function Home() {
           </div>
           <div className="h-full flex flex-col my-5">
             <div className="w-full h-full flex flex-col">
-              <form
-                className="w-full"
-                onSubmit={handleSubmit(() => onsubmit())}
-              >
+              <form onSubmit={handleSubmit(() => onsubmit())}>
                 <div className="flex w-1/2 [&>label]:w-full flex-row p-3 [&>input]:w-full [&>input]:border-1 [&>input]:rounded-sm [&>input]:p-1 items-center">
                   <label>Title</label>
                   <input
@@ -311,6 +352,35 @@ export default function Home() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Modal Loading  */}
+      <div
+        className={
+          loading
+            ? "block fixed pt-48 left-0 top-0 w-full h-full bg-gray-500 bg-opacity-40"
+            : "hidden"
+        }
+      >
+        <div className="bg-black flex flex-col m-auto h-auto w-1/4">
+          <div className="flex">
+            {/* <div className="justify-start font-bold flex w-full items-center">
+              Modal Title
+            </div> */}
+            {/* <div
+              className="cursor-pointer flex justify-end items-center hover:text-red-600"
+              onClick={() => {
+                setLoading((prev) => !prev);
+              }}
+            >
+              x
+            </div> */}
+          </div>
+          <div className="h-full flex flex-col my-5 text-center">
+            <div className="w-full h-full flex flex-col justify-center items-center text-white">
+              Loading...
             </div>
           </div>
         </div>

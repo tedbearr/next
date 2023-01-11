@@ -7,7 +7,7 @@ export default function HomeLayout({ children }) {
   // console.log(hide)
   return (
     <div className="w-full h-full flex p-3 sm:h-screen">
-      <div className={hide ? "" : "hidden"}>
+      <div className={hide ? "fixed sm:relative" : "hidden sm:hidden"}>
         <Sidebar></Sidebar>
       </div>
       <div className="-mt-3 -mr-2" onClick={() => setHide((prev) => !prev)}>
