@@ -2,13 +2,13 @@
 import Link from "next/link";
 import React, { useState } from "react";
 
-function Sidebar() {
+function Sidebar(props) {
   const [menu1, setMenu1] = useState(false);
   const [menu2, setMenu2] = useState(false);
   const [menu3, setMenu3] = useState(false);
   const [menu4, setMenu4] = useState(false);
   const [menu5, setMenu5] = useState(false);
-  // console.log(activeSidebar);
+  console.log(props.name);
   return (
     <div
       id="Sidebar"
@@ -34,7 +34,7 @@ function Sidebar() {
           <ul
             className={
               menu1
-                ? "w-full flex flex-col justify-center items-start text-base [&>li]:p-1"
+                ? "w-full flex flex-col justify-center mt-2 items-start text-base [&>li]:p-1"
                 : "hidden"
             }
           >

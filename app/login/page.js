@@ -25,7 +25,9 @@ export default function Page() {
         <input type="text" className="w-full"></input>
       </div>
       <div>
-        <button className="w-full bg-main text-white p-2 rounded-3xl">Login</button>
+        <button className="w-full bg-main text-white p-2 rounded-3xl">
+          Login
+        </button>
       </div>
     </div>
   );

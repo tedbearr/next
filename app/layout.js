@@ -12,6 +12,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
         ></link>
+        <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         {children}
       </body>
     </html>

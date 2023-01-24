@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
+import Loading from "../../components/Loading";
 
 export default function Home() {
   // let products = getData();
@@ -14,6 +15,10 @@ export default function Home() {
   let { products } = product;
   const [pending, setPending] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [modalView, setModalView] = useState();
+  const [api, setApi] = useState([]);
+  let { monitoring } = api;
+  console.log(monitoring);
 
   useEffect(() => {
     fetch("https://dummyjson.com/products").then((res) =>
@@ -21,6 +26,9 @@ export default function Home() {
         setProduct(result);
       })
     );
+    fetch("http://localhost:3000/api/hello")
+      .then((res) => res.json())
+      .then(setApi);
   }, []);
 
   useEffect(() => {
@@ -45,6 +53,7 @@ export default function Home() {
     handleSubmit,
     reset,
     getFieldState,
+    setValue,
   } = useForm();
 
   const openModal = () => {
@@ -62,9 +71,9 @@ export default function Home() {
     await fetch(`https://dummyjson.com/products/${id}`).then((res) =>
       res.json().then((resp) => {
         setIdEdit(resp.id);
-        document.getElementById("data1").value = resp.title;
-        document.getElementById("data2").value = resp.brand;
-        document.getElementById("data3").value = resp.description;
+        setValue("title", resp.title);
+        setValue("brand", resp.brand);
+        setValue("description", resp.description);
       })
     );
     setLoading(false);
@@ -73,17 +82,15 @@ export default function Home() {
 
   const openModalView = async (id) => {
     reset();
-    document.getElementById("Modal").style.display = "block";
+    clearFrom();
+    setModalView(true);
     setLoading(true);
     await fetch(`https://dummyjson.com/products/${id}`).then((res) =>
       res.json().then((resp) => {
         setIdEdit(resp.id);
-        document.getElementById("data1").value = resp.title;
-        document.getElementById("data2").value = resp.brand;
-        document.getElementById("data3").value = resp.description;
-        document.getElementById("data1").readOnly = true;
-        document.getElementById("data2").readOnly = true;
-        document.getElementById("data3").readOnly = true;
+        document.getElementById("viewTitle").innerText = resp.title;
+        document.getElementById("viewBrand").innerText = resp.brand;
+        document.getElementById("viewDescription").innerText = resp.description;
       })
     );
     setLoading(false);
@@ -103,63 +110,98 @@ export default function Home() {
     document.getElementById("data1").readOnly = false;
     document.getElementById("data2").readOnly = false;
     document.getElementById("data3").readOnly = false;
+    document.getElementById("viewBrand").innerText = "";
+    document.getElementById("viewDescription").innerText = "";
+    document.getElementById("viewTitle").innerText = "";
   };
 
   const onsubmit = async (data) => {
-    console.log(idEdit);
-    if (idEdit) {
-      setLoading(true);
-      await fetch(`https://dummyjson.com/products/${idEdit}`, {
-        method: "PUT" /* or PATCH */,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }).then((res) => {
-        if (res.status == 200) {
-          toast.success("Success edit data");
+    // console.log(idEdit);
+    Swal.fire({
+      icon: "warning",
+      text: idEdit
+        ? "Are you sure want to update this data?"
+        : "Are you sure want to add this data?",
+      width: "400px",
+      showCancelButton: true,
+      confirmButtonColor: "#61c0bf",
+      cancelButtonColor: "#7e7e7e",
+      confirmButtonText: idEdit ? "Update" : "Add",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        if (idEdit) {
+          setLoading(true);
+          await fetch(`https://dummyjson.com/products/${idEdit}`, {
+            method: "PUT" /* or PATCH */,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          }).then((res) => {
+            if (res.status == 200) {
+              toast.success("Success edit data");
+            } else {
+              toast.error("Error");
+            }
+          });
+          setLoading(false);
+          clearFrom();
+          reset();
+          closeModal();
         } else {
-          toast.error("Error");
+          setLoading(true);
+          await fetch("https://dummyjson.com/products/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          }).then((res) => {
+            if (res.status == 200) {
+              toast.success("Success add data");
+            } else {
+              toast.error("Error");
+            }
+          });
+          setLoading(false);
+          clearFrom();
+          reset();
+          closeModal();
         }
-      });
-      setLoading(false);
-      clearFrom();
-      reset();
-      closeModal();
-    } else {
-      setLoading(true);
-      await fetch("https://dummyjson.com/products/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }).then((res) => {
-        if (res.status == 200) {
-          toast.success("Success add data");
-        } else {
-          toast.error("Error");
-        }
-      });
-      setLoading(false);
-      clearFrom();
-      reset();
-      closeModal();
-    }
+      }
+    });
   };
 
   const deleteData = async (id) => {
-    setLoading(true);
-    await fetch(`https://dummyjson.com/products/${id}`, {
-      method: "DELETE",
-    }).then((res) => {
-      if (res.status == 200) {
-        toast.success("Success delete data");
-      } else {
-        toast.error("Error");
+    Swal.fire({
+      icon: "warning",
+      text: "Are you sure want to delete this data?",
+      width: "400px",
+      showCancelButton: true,
+      confirmButtonColor: "#61c0bf",
+      cancelButtonColor: "#7e7e7e",
+      confirmButtonText: "Delete",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setLoading(true);
+        await fetch(`https://dummyjson.com/products/${id}`, {
+          method: "DELETE",
+        }).then((res) => {
+          if (res.status == 200) {
+            toast.success("Success delete data");
+          } else {
+            toast.error("Error");
+          }
+        });
+        setLoading(false);
       }
     });
-    setLoading(false);
   };
 
   const search = () => {
     document.getElementById("table").style.display = "block";
+  };
+
+  const closeModalView = () => {
+    setModalView(false);
   };
 
   const column = [
@@ -288,7 +330,7 @@ export default function Home() {
         <div className="bg-white flex flex-col m-auto h-auto overflow-auto p-5 border-1 border-gray-100 w-4/5">
           <div className="flex border-b-1">
             <div className="justify-start font-bold flex w-full items-center">
-              Modal Title
+              {idEdit ? "Edit Data" : "Add Data"}
             </div>
             {/* <div
               className="cursor-pointer flex justify-end items-center hover:text-red-600"
@@ -356,35 +398,55 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* Modal Loading  */}
+      {/* Modal View */}
       <div
         className={
-          loading
-            ? "block fixed pt-48 left-0 top-0 w-full h-full bg-gray-500 bg-opacity-40"
+          modalView
+            ? "block fixed pt-24 pb-24 left-0 top-0 w-full h-full overflow-auto bg-gray-500 bg-opacity-40"
             : "hidden"
         }
+        id="Modal"
       >
-        <div className="bg-black flex flex-col m-auto h-auto w-1/4">
-          <div className="flex">
-            {/* <div className="justify-start font-bold flex w-full items-center">
-              Modal Title
-            </div> */}
+        <div className="bg-white flex flex-col m-auto h-auto overflow-auto p-5 border-1 border-gray-100 w-4/5">
+          <div className="flex border-b-1">
+            <div className="justify-start font-bold flex w-full items-center">
+              View Data
+            </div>
             {/* <div
               className="cursor-pointer flex justify-end items-center hover:text-red-600"
-              onClick={() => {
-                setLoading((prev) => !prev);
-              }}
+              onClick={closeModal}
             >
               x
             </div> */}
           </div>
-          <div className="h-full flex flex-col my-5 text-center">
-            <div className="w-full h-full flex flex-col justify-center items-center text-white">
-              Loading...
+          <div className="h-full flex flex-col my-5">
+            <div className="w-full h-full flex flex-col">
+              <div className="flex w-full flex-row p-3 items-center">
+                <label className="w-1/6">Title :</label>
+                <label id="viewTitle" className="w-full"></label>
+              </div>
+              <div className="flex w-full flex-row p-3 items-center">
+                <label className="w-1/6">Brand :</label>
+                <label id="viewBrand" className="w-full"></label>
+              </div>
+              <div className="flex w-full flex-row p-3 items-center">
+                <label className="w-1/6">Description :</label>
+                <label id="viewDescription" className="w-full"></label>
+              </div>
+              <div className="w-full flex justify-end border-t-1 pt-2">
+                <button
+                  className="bg-gray-500 text-white px-4 py-1 rounded-md mr-2"
+                  onClick={closeModalView}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {/* Modal Loading  */}
+      <Loading show={loading}></Loading>
     </div>
   );
 }

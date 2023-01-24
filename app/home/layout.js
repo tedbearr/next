@@ -8,7 +8,7 @@ export default function HomeLayout({ children }) {
   return (
     <div className="w-full h-full flex p-3 sm:h-screen">
       <div className={hide ? "fixed sm:relative" : "hidden sm:hidden"}>
-        <Sidebar></Sidebar>
+        <Sidebar name="SidebarProps"></Sidebar>
       </div>
       <div className="-mt-3 -mr-2" onClick={() => setHide((prev) => !prev)}>
         <i className="fa fa-eye-slash text-main text-xs"></i>
